@@ -246,9 +246,9 @@ def disease_prediction():
     title = 'Harvestify - Disease Detection'
 
     if request.method == 'POST':
-        if 'file' not in request.files:
+        if file not in request.files:
             return redirect(request.url)
-        file = request.files.get('file')
+        file = request.files.get(file)
         if not file:
             return render_template('disease.html', title=title)
         try:
