@@ -60,8 +60,7 @@ disease_classes = ['Apple___Apple_scab',
 
 disease_model_path = 'models/plant_disease_model.pth'
 disease_model = ResNet9(3, len(disease_classes))
-disease_model.load_state_dict(torch.load(
-    disease_model_path, map_location=torch.device('cpu')))
+disease_model.load_state_dict(torch.load(disease_model_path, map_location=torch.device('cpu')))
 disease_model.eval()
 
 
@@ -77,35 +76,35 @@ disease_model.eval()
 # Custom functions for calculations
 
 
-def weather_fetch(city_name):
-    """
-    Fetch and returns the temperature and humidity of a city
-    :params: city_name
-    :return: temperature, humidity
-    """
-    api_key = config.weather_api_key
-    base_url = "http://api.openweathermap.org/data/2.5/weather?"
+#def weather_fetch(city_name):
+#    """
+#    Fetch and returns the temperature and humidity of a city
+#    :params: city_name
+#    :return: temperature, humidity
+#    """
+#    api_key = config.weather_api_key
+#    base_url = "http://api.openweathermap.org/data/2.5/weather?"
 
-    complete_url = base_url + "appid=" + api_key + "&q=" + city_name
-    response = requests.get(complete_url)
-    x = response.json()
+#    complete_url = base_url + "appid=" + api_key + "&q=" + city_name
+#    response = requests.get(complete_url)
+#    x = response.json()
 
-    if x["cod"] != "404":
-        y = x["main"]
+#    if x["cod"] != "404":
+#        y = x["main"]
 
-        temperature = round((y["temp"] - 273.15), 2)
-        humidity = y["humidity"]
-        return temperature, humidity
-    else:
-        return None
+#        temperature = round((y["temp"] - 273.15), 2)
+#        humidity = y["humidity"]
+#        return temperature, humidity
+#    else:
+#        return None
 
 
 def predict_image(img, model=disease_model):
-    """
-    Transforms image to tensor and predicts disease label
-    :params: image
-    :return: prediction (string)
-    """
+#    """
+#    Transforms image to tensor and predicts disease label
+#    :params: image
+#    :return: prediction (string)
+#    """
     transform = transforms.Compose([
         transforms.Resize(256),
         transforms.ToTensor(),
@@ -115,7 +114,7 @@ def predict_image(img, model=disease_model):
     img_u = torch.unsqueeze(img_t, 0)
 
     # Get predictions from model
-    yb = model(img_u)
+    yb = disease_model(img_u)
     # Pick index with highest probability
     _, preds = torch.max(yb, dim=1)
     prediction = disease_classes[preds[0].item()]
@@ -139,24 +138,26 @@ def home():
 # render crop recommendation form page
 
 
-@ app.route('/crop-recommend')
-def crop_recommend():
-    title = 'Harvestify - Crop Recommendation'
-    return render_template('crop.html', title=title)
+#@ app.route('/crop-recommend')
+#def crop_recommend():
+#    title = 'Harvestify - Crop Recommendation'
+#    return render_template('crop.html', title=title)
 
 # render fertilizer recommendation form page
 
 
-@ app.route('/fertilizer')
-def fertilizer_recommendation():
-    title = 'Harvestify - Fertilizer Suggestion'
+#@ app.route('/fertilizer')
+#def fertilizer_recommendation():
+#    title = 'Harvestify - Fertilizer Suggestion'
 
-    return render_template('fertilizer.html', title=title)
+#    return render_template('fertilizer.html', title=title)
 
 # render disease prediction input page
 
+def fertilizer_recommendation():
+    title = 'Harvestify - Disease Results'
 
-
+    return render_template('disease-result.html', title=title)
 
 # ===============================================================================================
 
@@ -164,76 +165,78 @@ def fertilizer_recommendation():
 
 # render crop recommendation result page
 
+#"""
+#@ app.route('/crop-predict', methods=['POST'])
+#def crop_prediction():
+#    title = 'Harvestify - Crop Recommendation'
 
-@ app.route('/crop-predict', methods=['POST'])
-def crop_prediction():
-    title = 'Harvestify - Crop Recommendation'
-
-    if request.method == 'POST':
-        N = int(request.form['nitrogen'])
-        P = int(request.form['phosphorous'])
-        K = int(request.form['pottasium'])
-        ph = float(request.form['ph'])
-        rainfall = float(request.form['rainfall'])
+#    if request.method == 'POST':
+#        N = int(request.form['nitrogen'])
+#        P = int(request.form['phosphorous'])
+#        K = int(request.form['pottasium'])
+#        ph = float(request.form['ph'])
+#        rainfall = float(request.form['rainfall'])
 
         # state = request.form.get("stt")
-        city = request.form.get("city")
+#        city = request.form.get("city")
 
-        if weather_fetch(city) != None:
-            temperature, humidity = weather_fetch(city)
-            data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
-            my_prediction = crop_recommendation_model.predict(data)
-            final_prediction = my_prediction[0]
+#        if weather_fetch(city) != None:
+#            temperature, humidity = weather_fetch(city)
+#            data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
+#            my_prediction = crop_recommendation_model.predict(data)
+#            final_prediction = my_prediction[0]
 
-            return render_template('crop-result.html', prediction=final_prediction, title=title)
+#            return render_template('crop-result.html', prediction=final_prediction, title=title)
 
-        else:
+#        else:
 
-            return render_template('try_again.html', title=title)
+#            return render_template('try_again.html', title=title)
 
 # render fertilizer recommendation result page
 
 
-@ app.route('/fertilizer-predict', methods=['POST'])
-def fert_recommend():
-    title = 'Harvestify - Fertilizer Suggestion'
+#@ app.route('/fertilizer-predict', methods=['POST'])
+#def fert_recommend():
+#    title = 'Harvestify - Fertilizer Suggestion'
 
-    crop_name = str(request.form['cropname'])
-    N = int(request.form['nitrogen'])
-    P = int(request.form['phosphorous'])
-    K = int(request.form['pottasium'])
+#    crop_name = str(request.form['cropname'])
+#    N = int(request.form['nitrogen'])
+#    P = int(request.form['phosphorous'])
+#    K = int(request.form['pottasium'])
     # ph = float(request.form['ph'])
 
-    df = pd.read_csv('Data/fertilizer.csv')
+#    df = pd.read_csv('Data/fertilizer.csv')
 
-    nr = df[df['Crop'] == crop_name]['N'].iloc[0]
-    pr = df[df['Crop'] == crop_name]['P'].iloc[0]
-    kr = df[df['Crop'] == crop_name]['K'].iloc[0]
+#    nr = df[df['Crop'] == crop_name]['N'].iloc[0]
+#    pr = df[df['Crop'] == crop_name]['P'].iloc[0]
+#    kr = df[df['Crop'] == crop_name]['K'].iloc[0]
 
-    n = nr - N
-    p = pr - P
-    k = kr - K
-    temp = {abs(n): "N", abs(p): "P", abs(k): "K"}
-    max_value = temp[max(temp.keys())]
-    if max_value == "N":
-        if n < 0:
-            key = 'NHigh'
-        else:
-            key = "Nlow"
-    elif max_value == "P":
-        if p < 0:
-            key = 'PHigh'
-        else:
-            key = "Plow"
-    else:
-        if k < 0:
-            key = 'KHigh'
-        else:
-            key = "Klow"
+#    n = nr - N
+#    p = pr - P
+#    k = kr - K
+#    temp = {abs(n): "N", abs(p): "P", abs(k): "K"}
+#    max_value = temp[max(temp.keys())]
+#    if max_value == "N":
+#        if n < 0:
+#            key = 'NHigh'
+#        else:
+#            key = "Nlow"
+#    elif max_value == "P":
+#        if p < 0:
+#            key = 'PHigh'
+#        else:
+#            key = "Plow"
+#    else:
+#        if k < 0:
+#            key = 'KHigh'
+#        else:
+#            key = "Klow"
 
-    response = Markup(str(fertilizer_dic[key]))
+#    response = Markup(str(fertilizer_dic[key]))
 
-    return render_template('fertilizer-result.html', recommendation=response, title=title)
+#    return render_template('fertilizer-result.html', recommendation=response, title=title)
+
+#"""
 
 # render disease prediction result page
 
